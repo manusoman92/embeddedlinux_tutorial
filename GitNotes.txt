@@ -1,0 +1,127 @@
+
+check git installed or not
+git --version
+
+Installa if not
+sudo apt-get install git
+
+configure git
+git config --global user.name "manu"
+git config --global user.email "manusoman92@gmail.com"
+
+
+///create new project//// (init)
+
+create project directory on your system
+mkdir ~/myproject
+go to project directory
+cd ~/myproject
+
+iniytialize git from that directory
+git init
+
+check hidden folder 
+ls -a
+.git directory should be there aftre initialization
+
+check inside .git directory
+tree .git
+
+add project files in that directory
+
+status of repo
+
+git status
+
+create version
+git add {filename}
+
+git commit -m "comments"
+
+git log 
+
+to get prevoius version of file
+git checkout commitid(14 key)
+
+git log --all
+
+move to latest version
+git checkout master
+
+add all files in a directory
+git add --all or
+git add .
+
+create new branch
+git branch branchname
+
+swiched to new branch
+
+git checkout branchname
+
+To merg branch, we need to switched to brach to where we wish to merge, eg merge feature to master , we need to switch to master before merge
+
+git merge branchname
+
+to check in which branch we are
+
+git branch
+
+To check difference in file
+git diff
+
+To remove unnecessary lines after commit
+git stash
+
+fast-forward merge : any of one branch updating and merging to master branch
+recursive merge.. means two brnaches are updated independentely then tried to merge
+
+git conflict : modified and comitted same file with different branchhes, then manually we required to fix the conflict by open the file and select which modification is required then commit the the file
+
+
+/////////git remote////////////////
+
+sign up on github
+create new repository
+copy the https link
+
+git remote add remotename link
+remotename :user specific
+link : link to github repository
+
+to check the remote name
+git remote
+
+to check the link 
+git remote -v
+
+to push 
+git push remotename master {branch to be push}
+
+To work with an existing project
+git clone gitlink
+
+//////////////git for small team////////////////
+
+add member and give privilege to repository
+clone git to local system
+add new branch
+modify the code on new branch
+commit all
+
+checkout master
+git pull (from master branch)
+
+befor updating new branch code to remote , we required to merge master -> new branch, to make new branch is updated one
+checkout newbranch
+ merge master
+ commit
+ git push origin newbranch
+ 
+ after upload branch login to github of contributor and trigger pull request
+ making base brach as master and compare branch as new branch
+ 
+
+
+
+

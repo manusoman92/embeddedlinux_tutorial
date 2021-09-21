@@ -1,0 +1,220 @@
+Yocto Tutorial (version 3.3. hardknott)
+Installing Yocto:
+
+Required Git, tar, Python and gcc Versions
+
+Git 1.8.3.1 or greater
+
+tar 1.28 or greater
+
+Python 3.6.0 or greater
+
+
+install essential packages to host system
+
+$ sudo apt-get install gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev pylint3 xterm python3-subunit mesa-common-dev
+
+clone poky repository
+
+Use Git to Clone Poky
+
+git clone git://git.yoctoproject.org/poky
+
+move to poky directory and checkout branches available
+
+cd poky
+
+git branch -a
+
+check out the hardknott branch based on the Hardknott release
+
+git checkout -t origin/hardknott -b my-hardknott
+
+ to keep your local files in sync with the release branch
+ git pull {from same directory}
+ 
+ 
+ //////////////Build Image//////////////////
+ 
+ set up the environment
+ 
+	cd poky
+	source oe-init-build-env (build_dir)
+build_dir: dir to where out files stored
+
+examine local configuration file under 
+conf/local.conf
+
+target defaults are set to build for a qemux86 target, which is suitable for emulation. The package manager used is set to the RPM package manager.
+
+Start the Build
+bitbake core-image-minimal
+
+Simulate Your Image Using QEMU
+runqemu qemux86-64
+
+Exit QEMU
+Ctrl-C 
+ 
+ /////Layers//////////
+ * in yocto meta datas are structered as layers
+ * by default following layers are added at build_directroy/conf/local.conf
+ 
+ - meta : this is the OpenEnmbedded Core with some changes for poky
+ - meta-poky: this is the meta data specific for poky
+ - meta-yocto-bsp: this is the board support packages for machine that yocto support.
+ 
+ 
+ list of layers that bitbake serches are configured in local.con file in builddir/conf
+ 
+ By structuring the recipes and other configuration data in this way, it is very easy
+to extend the Yocto Project by adding new layers
+
+There is a useful
+list of layers at http://layers.openembedded.org/layerindex/branch/master/layers/.
+ 
+Eg:
+
+meta-angstrom: The Ångström distribution
+meta-qt5: Qt 5 libraries and utilities
+meta-intel: BSPs for Intel CPUs and SoCs
+meta-ti: BSPs for TI ARM-based SoCs
+
+
+// adding layer////
+
+create a folder under poky directory with name begin with meta
+
+Each meta layer contain one configuration under conf/layer.conf and license file, and readme file
+
+refer: D:/EmbeddedStudy/embeddedlinux/masterin embedded linux/chapter6
+
+we can create meta layer using script
+ initialize build environment or go to existing build directory
+ run 
+ bitbake-layer create-layer meta-layername
+ 
+ *layer name must start with meta-
+ 
+ to add this layer to bbconf file under conf/local.conf
+ run script from build directory
+ bitbake-layer add-layer layer-name
+ 
+ we can check layer added to currently,
+ run 
+ 
+ bitbake-layer show-layers
+ 
+ 
+ 
+ NB:
+ At this point, it would be a good idea to run a build, using this empty layer. The
+final target will be the Nova board but, for now, build for a BeagleBone Black by
+removing the comment before MACHINE ?= "beaglebone" in conf/local.conf. Then,
+build a small image using bitbake core-image-minimal as before
+ 
+ ///////////BitBake and recipes///////////////
+ 
+ bitbake processes following meta data
+
+recipe : files ending with .bb contain information about a unit of software,including how to get copy of source file,
+		dependencies on other component, how to build and install it
+append : files ending .bbappend.these allow some details to be overriden or extend on recipe with same root name.
+		it just append the 	 instruction on .bbappend file to end of .bb of same root name.	
+include : file ending in incl. these file contain information , that are common to multiple recipes.
+		The files maybe included using the include or require keywords. The difference is
+		that require produces an error if the file does not exist, whereas include does not
+classes :files end in .bbclass.these contain common build information like how to build or 
+			how to build an autotools project.The classes are inherited and extended in recipes and other classes using the inherit keyword. The class classes/base.bbclass is implicitly inherited in
+		every recipe
+configuration: Files ending in .conf. They define various configuration
+			variables that govern the project's build process
+			
+	
+
+recipe contain set of task, like do_compile,do_fetch..., to execute these task Bitbake is used.
+By defaut task is do_build
+
+We cna list tasks associted with the recipe as
+bitbake -c listtasks core-image-minimal
+
+-C : used for execute particular recepie for the target, it will execute do_listtasks.
+	
+////Example to create a recipe////////
+
+
+create recipe for helloworld program.
+
+The recipe files are are usually named <package-name>_<version>.bb.
+
+under meta-nova create folder file, put source file there
+meta-nova/recipes-local/helloworld
+	-file
+		helloworld.c
+	helloworld_1.0.bb
+
+add following lines to helloworld_1.0.bb
+
+/////////////////////////////////
+DESCRIPTION = "A friendly program that prints Hello World!" 
+PRIORITY = "optional" 
+SECTION = "examples" 
+
+LICENSE = "GPLv2" 
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6" 
+
+SRC_URI = "file://helloworld.c" 
+
+S = "${WORKDIR}"
+ 
+do_compile() { 
+	${CC} ${CFLAGS} ${LDFLAGS} helloworld.c -o helloworld
+} 
+
+do_install() { 
+	install -d ${D}${bindir} 
+	install -m 0755 helloworld ${D}${bindir} 
+}
+/////////////////////////////////////
+
+then build the recipe helloworld
+bitbake helloworld
+
+If all goes well, you should see that it has created a working directory for it in
+tmp/work/cortexa8hf-vfp-neon-poky-linux-gnueabi/helloworld/. You should also see there
+is an RPM package for it in tmp/deploy/rpm/cortexa8hf_vfp_neon/helloworld-1.0-
+r0.cortexa8hf_vfp_neon.rpm
+
+
+It is not part of the target image yet, though. The list of packages to be installed
+is held in a variable named IMAGE_INSTALL. You can append to the end of that list by
+adding this line to conf/local.conf:
+IMAGE_INSTALL_append = " helloworld" {not space befor helloworld}
+
+or
+
+The problem with making changes to local.conf is that they are, well, local. If you
+want to create an image that is to be shared with other developers or to be loaded
+onto a production system, then you should put the changes into an image recipe
+
+there is image recipe for coe under meta directory
+cd poky
+ls meta*/recipes*/images/*.bb
+You will find that the recipe for core-image-minimal is in meta/recipes-core/images/coreimage-
+minimal.bb.
+
+A simple approach is to take an existing image recipe and modify it using
+statements similar to those you used in local.conf.
+For example, imagine that you want an image that is the same as core-imageminimal
+but includes your helloworld program and the strace utility. You can do that
+with a two-line recipe file, which includes (using the require keyword) the base
+image and adds the packages you want. It is conventional to put the image in a
+directory named images, so add the recipe nova-image.bb with this content in metanova/
+recipes-local/images:
+
+require recipes-core/images/core-image-minimal.bb
+IMAGE_INSTALL += "helloworld strace"
+
+Now, you can remove the IMAGE_INSTALL_append line from your local.conf and build it
+using this:
+$ bitbake nova-image
