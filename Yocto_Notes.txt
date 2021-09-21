@@ -221,3 +221,4 @@ $ bitbake nova-image
 
 ///reference
  Mastering Embedded Linux Programming
+https://community.nxp.com/t5/i-MX-Processors-Knowledge-Base/Useful-bitbake-commands/ta-p/1128559
