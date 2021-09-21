@@ -218,3 +218,6 @@ IMAGE_INSTALL += "helloworld strace"
 Now, you can remove the IMAGE_INSTALL_append line from your local.conf and build it
 using this:
 $ bitbake nova-image
+
+///reference
+ Mastering Embedded Linux Programming
